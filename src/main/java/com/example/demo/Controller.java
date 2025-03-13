@@ -21,20 +21,32 @@ public class Controller {
         return studentRepo.findAll();
     }
 
+//    @PostMapping("/updateStudent")
+//    public StudentEntity updateStudentName(@RequestParam Integer id, @RequestParam String updateValue,
+//                                           @RequestParam String update) throws Exception {
+//        StudentEntity student = studentRepo.findById(id).orElse(null);
+//        if (student != null) {
+//            if (update.equalsIgnoreCase("name")) {
+//                student.setName(updateValue);
+//            } else if (update.equalsIgnoreCase("dept")) {
+//                student.setDept(updateValue);
+//            }
+//            studentRepo.save(student);
+//            return student;
+//        }
+//        return null;
+//    }
+
     @PostMapping("/updateStudent")
-    public StudentEntity updateStudentName(@RequestParam Integer id, @RequestParam String updateValue,
-                                           @RequestParam String update) throws Exception {
-        StudentEntity student = studentRepo.findById(id).orElse(null);
+    public StudentEntity updateStudentName(@RequestBody StudentEntity studentEntity) throws Exception {
+        StudentEntity student = studentRepo.findById(studentEntity.getId()).orElse(null);
         if (student != null) {
-            if (update.equalsIgnoreCase("name")) {
-                student.setName(updateValue);
-            } else if (update.equalsIgnoreCase("dept")) {
-                student.setDept(updateValue);
-            }
+            student.setName(studentEntity.getName());
+            student.setDept(studentEntity.getDept());
             studentRepo.save(student);
             return student;
-        }
-        return null;
+        } else
+            return null;
     }
 
     @DeleteMapping("/deleteStudentData")
