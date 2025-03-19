@@ -25,7 +25,7 @@ import jakarta.persistence.EntityManagerFactory;
         basePackages = { "com.example.demo.azure.repo" }
 )
 public class AccountDataSourceConfig {
-
+ 
     @Bean(name="accountDataSource")
     @Primary
     @ConfigurationProperties(prefix="spring.accountdb.datasource")
