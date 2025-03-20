@@ -54,7 +54,6 @@ public class Controller {
     @PostMapping("/createStudentData")
     public Object createStudentData(@RequestBody StudentEntity studentDetail) throws Exception {
         Object result = new Object();
-        Boolean isPrimaryDatabaseDown = false;
 
         if (healthCheckService.isDatabaseUp()) {
             try {
@@ -63,7 +62,6 @@ public class Controller {
             }
         } else {
             schedulerService.scheduleMonitorTask();
-            isPrimaryDatabaseDown = true;
         }
 
         StudentAwsEntity studentAwsEntity = new StudentAwsEntity();
@@ -93,5 +91,52 @@ public class Controller {
     public String scheduleMonitor() {
         System.out.println("Executing scheduled monitor task...");
         return "Monitor task executed.";
+    }
+
+    @PostMapping("/updateStudent")
+    public Object updateStudentName(@RequestBody StudentEntity studentEntity) throws Exception {
+
+        if (healthCheckService.isDatabaseUp()) {
+            try {
+                StudentEntity student = null;
+                student = StudentAzureRepo.findById(studentEntity.getId()).orElse(null);
+                if (student != null) {
+                    student.setName(studentEntity.getName());
+                    student.setDept(studentEntity.getDept());
+                    StudentAzureRepo.save(student);
+                }
+            } catch (Exception e) {
+            }
+        } else {
+            schedulerService.scheduleMonitorTask();
+        }
+
+        StudentAwsEntity studentAwsEntity = new StudentAwsEntity();
+        studentAwsEntity = StudentAwsRepo.findById(studentEntity.getId()).orElse(null);
+        if (null != studentAwsEntity) {
+            studentAwsEntity.setName(studentEntity.getName());
+            studentAwsEntity.setDept(studentEntity.getDept());
+            StudentAwsRepo.save(studentAwsEntity);
+        }
+
+        return studentAwsEntity;
+    }
+
+    @DeleteMapping("/deleteStudentData")
+    public Boolean deleteStudentData(@RequestParam Integer id) throws Exception {
+        Boolean status = true;
+
+        if (healthCheckService.isDatabaseUp()) {
+            try {
+                StudentAzureRepo.deleteById(id);
+            } catch (Exception e) {
+
+            }
+        } else {
+            schedulerService.scheduleMonitorTask();
+        }
+
+        StudentAwsRepo.deleteById(id);
+        return status;
     }
 }
