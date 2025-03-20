@@ -25,7 +25,7 @@ import jakarta.persistence.EntityManagerFactory;
 )
 public class UserDataSourceConfig {
     @Bean(name="userDataSource")
-    @ConfigurationProperties(prefix="spring.userdb.datasource")
+    @ConfigurationProperties(prefix="spring.japan.datasource")
     public DataSource userDataSource() {
         return DataSourceBuilder.create().build();
     }

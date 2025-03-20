@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "studentaws")
+@Table(name = "student")
 @Data
 @Getter
 @Setter

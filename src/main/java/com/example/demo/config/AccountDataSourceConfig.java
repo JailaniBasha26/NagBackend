@@ -28,7 +28,7 @@ public class AccountDataSourceConfig {
  
     @Bean(name="accountDataSource")
     @Primary
-    @ConfigurationProperties(prefix="spring.accountdb.datasource")
+    @ConfigurationProperties(prefix="spring.us.datasource")
     public DataSource accountDataSource() {
         return DataSourceBuilder.create().build();
     }
