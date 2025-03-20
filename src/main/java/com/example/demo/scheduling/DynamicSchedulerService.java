@@ -24,6 +24,7 @@ public class DynamicSchedulerService {
     private ScheduledFuture<?> scheduledFuture;
     private final RestTemplate restTemplate;
     private boolean IsScheduleRunning = false;
+    private boolean currentHealthStatus = true;
 
     public DynamicSchedulerService() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -38,34 +39,38 @@ public class DynamicSchedulerService {
             scheduledFuture.cancel(false);
         }
 //        if (!IsScheduleRunning) {
-            // Schedule the new task to run every 30 minutes
-            scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> {
-                System.out.println("Calling /scheduleMonitor API...");
-                IsScheduleRunning = true;
-                try {
+        // Schedule the new task to run every 30 minutes
+        scheduledFuture = taskScheduler.scheduleAtFixedRate(() -> {
+            System.out.println("Calling /scheduleMonitor API...");
+            IsScheduleRunning = true;
+            currentHealthStatus = false;
+            try {
 //                restTemplate.getForObject("http://localhost:8080/scheduleMonitor", String.class);
-                    Boolean healthCheckStatus = healthCheckService.isDatabaseUp();
+                Boolean healthCheckStatus = healthCheckService.isDatabaseUp();
 
-                    if (healthCheckStatus) {
-                        Boolean status = false;
-                        status = studentImpl.copyDataFromSecondaryToParentDatabase();
+                if (healthCheckStatus && !currentHealthStatus) {
+                    Boolean status = false;
+                    status = studentImpl.copyDataFromSecondaryToParentDatabase();
 
-                        if (status) {
-                            cancelScheduledTask();
-                        }
+                    if (status) {
+                        currentHealthStatus = true;
+                        scheduledFuture.cancel(false);
+//                        cancelScheduledTask();
+                        System.out.println("Scheduled task cancelled.");
                     }
+                }
 
                 /*
                 if healthCheckStatus is true,
                     copy the student data from japan to us
                 * */
-                    System.out.println("AUTO CALL >>> " + healthCheckStatus);
+                System.out.println("AUTO CALL >>> " + healthCheckStatus);
 
-                } catch (Exception e) {
-                    System.out.println("Error calling /scheduleMonitor: " + e.getMessage());
-                }
+            } catch (Exception e) {
+                System.out.println("Error calling /scheduleMonitor: " + e.getMessage());
+            }
 //        }, TimeUnit.MINUTES.toMillis(30)); // 30 minutes
-            }, TimeUnit.SECONDS.toMillis(5));  // Updated interval to 5 seconds
+        }, TimeUnit.SECONDS.toMillis(5));  // Updated interval to 5 seconds
 //        }
     }
 
@@ -75,5 +80,9 @@ public class DynamicSchedulerService {
             IsScheduleRunning = false;
             System.out.println("Scheduled task cancelled.");
         }
+    }
+
+    public boolean currentHealthStatus() {
+        return currentHealthStatus;
     }
 }
